@@ -34,9 +34,9 @@ Machine-Learning/
 
 ├── Projects/
 
-  │   └── EDA (Airbnb)/
+  │   └── /AirBnb Capstone EDA Project
 
-  │       ├── Sample EDA Submission Template.ipynb  
+  │       ├── AirBnb Capstone EDA Project.ipynb
 
   │     
 
@@ -48,7 +48,6 @@ Machine-Learning/
 
 ### 📊 **Project: Airbnb Data Analysis**
 
-> 📁 Location: `/projects/Airbnb Data Analysis/`
 
 #### ✅ Description:
 
