@@ -2,7 +2,9 @@
 
 ## 🧠 Machine Learning Practice & Project Repository :
 
-Welcome to my Machine Learning repository, where I explore a wide range of ML concepts, algorithms, and real-world projects. This repo includes both hands-on projects and practice notebooks focused on strengthening ML fundamentals.
+Welcome to my Machine Learning repository, where I explore a wide range of ML concepts,
+algorithms, and real-world projects. This repo includes both hands-on projects 
+and practice notebooks focused on strengthening ML fundamentals.
 
 
 ---
@@ -11,21 +13,35 @@ Welcome to my Machine Learning repository, where I explore a wide range of ML co
 
 ---
 Machine-Learning/
+
 ├── ML Practice/
+
 │   ├── PYTHON BASICS.ipynb
+
 │   ├── LIST-TUPLES-SETS-DICTIONARY-LOOPS-ITERATIONS.ipynb
+
 │   ├── LIST & SET COMPREHENSION - FUNCTION - OOPS - NumPy.ipynb
+
 │   ├── PANDAS.ipynb
+
 │   ├── Pandas Operations.ipynb
+
 │   ├── Matplotlib and Seaborn.ipynb
+
 │   └── Data Cleaning.ipynb
+
 │
+
 ├── Projects/
+
 │   └── EDA (Airbnb)/
+
 │       ├── Sample EDA Submission Template.ipynb
+
 │     
-│     
+
 │
+
 └── README.md
 
 ```
@@ -38,7 +54,8 @@ Machine-Learning/
 
 #### ✅ Description:
 
-A complete exploratory data analysis (EDA) of the NYC Airbnb dataset, uncovering pricing patterns, listing availability, host behavior, and customer preferences using visualizations and statistics.
+A complete exploratory data analysis (EDA) of the NYC Airbnb dataset, uncovering pricing patterns,
+listing availability, host behavior, and customer preferences using visualizations and statistics.
 
 #### 🔧 Techniques Used:
 
