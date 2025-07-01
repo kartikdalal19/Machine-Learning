@@ -16,31 +16,29 @@ Machine-Learning/
 
 ├── ML Practice/
 
-│   ├── PYTHON BASICS.ipynb
+  │   ├── PYTHON BASICS.ipynb
 
-│   ├── LIST-TUPLES-SETS-DICTIONARY-LOOPS-ITERATIONS.ipynb
+  │   ├── LIST-TUPLES-SETS-DICTIONARY-LOOPS-ITERATIONS.ipynb
 
-│   ├── LIST & SET COMPREHENSION - FUNCTION - OOPS - NumPy.ipynb
+  │   ├── LIST & SET COMPREHENSION - FUNCTION - OOPS - NumPy.ipynb
 
-│   ├── PANDAS.ipynb
+  │   ├── PANDAS.ipynb
 
-│   ├── Pandas Operations.ipynb
+  │   ├── Pandas Operations.ipynb
 
-│   ├── Matplotlib and Seaborn.ipynb
+  │   ├── Matplotlib and Seaborn.ipynb
 
-│   └── Data Cleaning.ipynb
+  │   └── Data Cleaning.ipynb
 
-│
+  │
 
 ├── Projects/
 
-│   └── EDA (Airbnb)/
+  │   └── EDA (Airbnb)/
 
-│       ├── Sample EDA Submission Template.ipynb
+  │       ├── Sample EDA Submission Template.ipynb  
 
-│     
-
-│
+  │     
 
 └── README.md
 
