@@ -30,6 +30,8 @@ Machine-Learning/
 
   │   └── Data Cleaning.ipynb
 
+  │   └── Linear Regression Implementation
+
   │
 
 ├── Projects/
