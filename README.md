@@ -32,7 +32,7 @@ Machine-Learning/
 
   │   └── Linear Regression Implementation
   
-  |   └── Classification_(Churn_Prediction)
+  │    └── Classification_(Churn_Prediction)
 
 
 ├── Projects/
