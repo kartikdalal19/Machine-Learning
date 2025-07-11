@@ -40,9 +40,13 @@ Machine-Learning/
 
   │       ├── AirBnb Capstone EDA Project.ipynb
 
-  │     
+  │   └── /Bike_Sharing_Demand_Prediction(Regression)
 
-└── README.md
+  │       ├── AirBnb Capstone EDA Project.ipynb
+
+  |
+
+├── README.md
 
 ```
 
