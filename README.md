@@ -44,7 +44,7 @@ Machine-Learning/
 
   │   └── /Bike_Sharing_Demand_Prediction(Regression)
 
-  │       ├── Bike_Sharing_Demand_Prediction(Regression)
+  │       ├── Bike_Sharing_Demand_Prediction(Regression).ipynb
 
   |
 
