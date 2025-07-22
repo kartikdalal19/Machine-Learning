@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Movie Recommender</title>
+  <!-- <link rel="stylesheet" href="indec.css"> -->
+  <style>
+   body {
+      background-image: url("static/premium_photo-1661675440353-6a6019c95bc7.avif");
+      /* background-size:cover; */
+      background-size: 100%, 100%;  /* width height */
+
+      background-repeat: no-repeat;
+      background-position: center center;
+      height: 90vh;
+      /* width: 100vw; */
+      /* margin: 2%; */
+      /* padding: 2%; */
+      border: 2px solid black;
+    }
+
+    .d1 {
+      color: rgb(255, 255, 255);
+      text-align: center;
+      /* padding-top: 25px; */
+      padding-left: 20%;
+      font-size: 215%;
+      height: 100%;
+      width: 78vw;
+      text-shadow: 5px 2px 5px black;
+      border: 2px solid red;
+    }
+
+    /* .sub_h{
+      color: rgb(255, 255, 255);
+      text-align: center;
+      
+      padding-left: 20%;
+      font-size: 28px;
+      height: 20vh;
+      width: 50vw;
+      text-shadow: 5px 2px 5px black;
+      border: 2px solid green;
+    } */
+
+
+.sub_h {
+  color: rgb(255, 255, 255);
+  text-align: center;
+  font-size: 28px;
+  padding-left: 27%;
+  height: 15vh;
+  width: 50vw;
+  text-shadow: 5px 2px 5px black;
+  border: 2px solid green;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid white;
+  animation: typing 3s steps(50, end) infinite, blink 0.75s step-end infinite;
+}
+
+/* Typing animation */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 50vw }
+}
+
+/* Blinking cursor */
+@keyframes blink {
+  50% { border-color: transparent }
+}
+
+
+.movie-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  margin-left: 20%;
+  gap: 25px;
+  width: 50vw;
+  border: solid grey 2px;
+}
+
+.movie-form input[type="text"] {
+  padding: 12px 20px;
+  width: 300px;
+  height: 37px;
+  border: solid yellow 2px;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 22px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.movie-form input[type="text"]:focus {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.6);
+}
+
+.movie-form button {
+  padding: 12px 24px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  height: 43px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.movie-form button:hover {
+  background-color: #e60000;
+  transform: scale(1.05);
+}
+
+
+  </style>
+</head>
+<body>
+  <!-- <h1>Movie Recommendation System</h1> -->
+ 
+<div class="d1">
+<h1>Welcome to The Movie <br> Recommendation System</h1>
+<h2 class="sub_h">🎬 "Your next favorite movie is just one click away!"
+
+</h2>
+ <!-- <form action="/recommend" method="POST">
+    <input type="text" name="movie" placeholder="Enter a movie title" required>
+    <button type="submit">Get Recommendations</button>
+  </form> -->
+
+
+  <form action="/recommend" method="POST" class="movie-form">
+    <input type="text" name="movie" placeholder="Enter a movie title here ...." required>
+    <button type="submit">Get Recommendations</button>
+  </form>
+
+</div>
+
+</body>
+</html>
