@@ -105,6 +105,3 @@ PCA revealed that:
 This project demonstrates how clustering can uncover hidden patterns in customer behavior, helping businesses optimize marketing, improve customer satisfaction, and boost revenue.
 
 ---
-
-## 📁 Project Structure
-
