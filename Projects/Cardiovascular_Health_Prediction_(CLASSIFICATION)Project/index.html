@@ -1,0 +1,867 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Cardiovascular Risk Prediction</title>
+</head>
+<body>
+<h2>Cardiovascular Disease Risk Prediction</h2>
+
+<form id="form">
+    Age: <input type="number" id="age" required><br><br>
+
+    Gender:
+    <select id="sex">
+        <option value="1">Male</option>
+        <option value="0">Female</option>
+    </select><br><br>
+
+    Smoking:
+    <select id="is_smoking">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+    </select><br><br>
+
+    Cigarettes/day: <input type="number" id="cigsPerDay" value="0"><br><br>
+
+    BP Medication:
+    <select id="BPMeds">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+    </select><br><br>
+
+    Hypertension:
+    <select id="prevalentHyp">
+        <option value="0">No</option>
+        <option value="1">Yes</option>
+    </select><br><br>
+
+    Total Cholesterol (mg/dL): <input type="number" id="totChol" required><br><br>
+    Systolic BP: <input type="number" id="sysBP" required><br><br>
+    Diastolic BP: <input type="number" id="diaBP" required><br><br>
+    Height (cm): <input type="number" id="height" required><br><br>
+    Weight (kg): <input type="number" id="weight" required><br><br>
+    Heart Rate: <input type="number" id="heartRate" required><br><br>
+    Glucose (mg/dL): <input type="number" id="glucose" required><br><br>
+
+    <button type="submit">Predict</button>
+</form>
+
+<h3 id="result"></h3>
+
+<script>
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
+
+    const data = {
+        age: +age.value,
+        sex: +sex.value,
+        is_smoking: +is_smoking.value,
+        cigsPerDay: +cigsPerDay.value || 0,
+        BPMeds: +BPMeds.value,
+        prevalentHyp: +prevalentHyp.value,
+        totChol: +totChol.value,
+        sysBP: +sysBP.value,
+        diaBP: +diaBP.value,
+        height: +height.value,
+        weight: +weight.value,
+        heartRate: +heartRate.value,
+        glucose: +glucose.value
+    };
+
+    const res = await fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    document.getElementById("result").innerText =
+        `${result.risk} (Risk Probability: ${result.probability}%)`;
+};
+</script>
+
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cardiovascular Risk Prediction</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(to right, #e3f2fd, #f3e5f5); }
+        .container { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 30px; }
+        .stepper { display: flex; justify-content: center; margin-bottom: 30px; }
+        .step { height: 12px; width: 12px; margin: 0 6px; background: #ddd; border-radius: 50%; transition: all 0.3s; }
+        .step.active { background: #2196F3; transform: scale(1.2); }
+        .step.finish { background: #4CAF50; }
+        .card { display: none; animation: slideIn 0.5s ease-out; border-radius: 12px; padding: 25px; background: #fafafa; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .card.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
+        input:focus, select:focus { outline: none; border-color: #2196F3; }
+        .input-group { margin-bottom: 20px; }
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; }
+        button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .btn-prev { background: #757575; color: white; }
+        .btn-prev:hover:not(:disabled) { background: #616161; }
+        .btn-next { background: #2196F3; color: white; }
+        .btn-next:hover:not(:disabled) { background: #1976D2; }
+        .btn-submit { background: #4CAF50; color: white; }
+        .btn-submit:hover { background: #45a049; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #result { margin-top: 20px; font-size: 24px; font-weight: bold; text-align: center; padding: 20px; border-radius: 10px; background: #e8f5e8; }
+        .error { border-color: #f44336 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cardiovascular Disease Risk Prediction</h2>
+        
+        <div class="stepper">
+            <span class="step"></span>
+            <span class="step"></span>
+            <span class="step"></span>
+            <span class="step"></span>
+        </div>
+
+        <form id="form">
+            <div id="card1" class="card active">
+                <div class="input-group">
+                    <label>Age:</label>
+                    <input type="number" id="age" required min="18" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Gender:</label>
+                    <select id="sex" required>
+                        <option value="">Select</option>
+                        <option value="1">Male</option>
+                        <option value="0">Female</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Smoking:</label>
+                    <select id="is_smoking" required>
+                        <option value="">Select</option>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Cigarettes per day:</label>
+                    <input type="number" id="cigsPerDay" value="0" min="0">
+                </div>
+            </div>
+
+            <div id="card2" class="card">
+                <div class="input-group">
+                    <label>BP Medication:</label>
+                    <select id="BPMeds" required>
+                        <option value="">Select</option>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Hypertension:</label>
+                    <select id="prevalentHyp" required>
+                        <option value="">Select</option>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Systolic BP (mmHg):</label>
+                    <input type="number" id="sysBP" required min="50" max="250">
+                </div>
+                <div class="input-group">
+                    <label>Diastolic BP (mmHg):</label>
+                    <input type="number" id="diaBP" required min="30" max="150">
+                </div>
+            </div>
+
+            <div id="card3" class="card">
+                <div class="input-group">
+                    <label>Total Cholesterol (mg/dL):</label>
+                    <input type="number" id="totChol" required min="100" max="500">
+                </div>
+                <div class="input-group">
+                    <label>Glucose (mg/dL):</label>
+                    <input type="number" id="glucose" required min="50" max="500">
+                </div>
+                <div class="input-group">
+                    <label>Heart Rate (bpm):</label>
+                    <input type="number" id="heartRate" required min="40" max="200">
+                </div>
+            </div>
+
+            <div id="card4" class="card">
+                <div class="input-group">
+                    <label>Height (cm):</label>
+                    <input type="number" id="height" required min="100" max="250" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>Weight (kg):</label>
+                    <input type="number" id="weight" required min="30" max="300" step="0.1">
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-prev" id="prevBtn">Previous</button>
+                    <button type="submit" class="btn-submit" id="submitBtn" disabled>Calculate Risk</button>
+                </div>
+            </div>
+
+            <div class="btn-group" id="navBtns" style="display: none;">
+                <button type="button" class="btn-prev" id="prevBtn2">Previous</button>
+                <button type="button" class="btn-next" id="nextBtn" disabled>Next</button>
+            </div>
+        </form>
+
+        <h3 id="result"></h3>
+    </div>
+
+    <script>
+        const cards = document.querySelectorAll('.card');
+        const steps = document.querySelectorAll('.step');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtns = document.querySelectorAll('.btn-prev');
+        const submitBtn = document.getElementById('submitBtn');
+        const navBtns = document.getElementById('navBtns');
+        let currentStep = 0;
+
+        function showStep(n) {
+            cards.forEach(card => card.classList.remove('active'));
+            steps.forEach(s => s.classList.remove('active', 'finish'));
+            cards[n].classList.add('active');
+            steps[n].classList.add('active');
+            for (let i = 0; i < n; i++) steps[i].classList.add('finish');
+
+            if (n === 0) {
+                document.getElementById('prevBtn').style.display = 'none';
+                document.getElementById('prevBtn2').style.display = 'none';
+            } else {
+                document.getElementById('prevBtn').style.display = 'block';
+                document.getElementById('prevBtn2').style.display = 'block';
+            }
+            navBtns.style.display = n < 3 ? 'flex' : 'none';
+            submitBtn.disabled = n !== 3;
+        }
+
+        function validateCurrentStep() {
+            const inputs = cards[currentStep].querySelectorAll('input[required], select[required]');
+            let valid = true;
+            inputs.forEach(input => {
+                if (!input.value) {
+                    input.classList.add('error');
+                    valid = false;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+            nextBtn.disabled = !valid;
+            return valid;
+        }
+
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('input', () => validateCurrentStep());
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (validateCurrentStep()) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        });
+
+        prevBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentStep--;
+                showStep(currentStep);
+            });
+        });
+
+       document.getElementById('form').onsubmit = async (e) => {
+    e.preventDefault();
+
+    const data = {
+        age: +document.getElementById('age').value,
+        sex: +document.getElementById('sex').value,
+        is_smoking: +document.getElementById('is_smoking').value,
+        cigsPerDay: +document.getElementById('cigsPerDay').value || 0,
+        BPMeds: +document.getElementById('BPMeds').value,
+        prevalentHyp: +document.getElementById('prevalentHyp').value,
+        totChol: +document.getElementById('totChol').value,
+        sysBP: +document.getElementById('sysBP').value,
+        diaBP: +document.getElementById('diaBP').value,
+        height: +document.getElementById('height').value,
+        weight: +document.getElementById('weight').value,
+        heartRate: +document.getElementById('heartRate').value,
+        glucose: +document.getElementById('glucose').value
+    };
+
+    const res = await fetch("/predict", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+
+    const resultEl = document.getElementById('result');
+    resultEl.innerText = `${result.risk} (Risk Probability: ${result.probability}%)`;
+    resultEl.style.display = 'block';
+};
+
+        showStep(0);
+        validateCurrentStep();
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardioRisk AI - Advanced Heart Health Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .predict-btn {
+            width: 100%;
+            grid-column: 1 / -1;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .predict-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .predict-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .predict-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 32px;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result.high {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+
+        .result.low {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+
+        .probability {
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 20px auto;
+        }
+
+        .progress-circle {
+            transform: rotate(-90deg);
+            display: block;
+        }
+
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke: #e5e7eb;
+        }
+
+        .progress-circle .progress {
+            stroke: url(#gradient);
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 24px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .form-group:hover .tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h1>CardioRisk AI</h1>
+                <p class="subtitle">Advanced Cardiovascular Risk Assessment</p>
+            </div>
+
+            <form id="form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="age">Age <i class="fas fa-info-circle tooltip-icon" data-tooltip="Your age in years"></i></label>
+                        <input type="number" id="age" min="20" max="100" required>
+                        <div class="input-icon"><i class="fas fa-birthday-cake"></i></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sex">Gender</label>
+                        <select id="sex" required>
+                            <option value="">Select</option>
+                            <option value="1">Male</option>
+                            <option value="0">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="is_smoking">Smoking Status</label>
+                        <select id="is_smoking" required>
+                            <option value="">Select</option>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cigsPerDay">Cigarettes/Day</label>
+                        <input type="number" id="cigsPerDay" min="0" max="100" value="0">
+                        <div class="input-icon"><i class="fas fa-smoking"></i></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="BPMeds">BP Medication</label>
+                        <select id="BPMeds" required>
+                            <option value="">Select</option>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prevalentHyp">Hypertension</label>
+                        <select id="prevalentHyp" required>
+                            <option value="">Select</option>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="totChol">Total Cholesterol (mg/dL)</label>
+                        <input type="number" id="totChol" min="100" max="400" required>
+                        <div class="input-icon"><i class="fas fa-vial"></i></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sysBP">Systolic BP (mmHg)</label>
+                        <input type="number" id="sysBP" min="80" max="250" required>
+                        <div class="input-icon"><i class="fas fa-tint"></i></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diaBP">Diastolic BP (mmHg)</label>
+                        <input type="number" id="diaBP" min="40" max="150" required>
+                        <div class="input-icon"><i class="fas fa-tint"></i></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" min="140" max="220" step="0.1" required>
+                        <div class="input-icon"><i class="fas fa-ruler-vertical"></i></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" min="30" max="200" step="0.1" required>
+                        <div class="input-icon"><i class="fas fa-weight-hanging"></i></div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="heartRate">Heart Rate (bpm)</label>
+                        <input type="number" id="heartRate" min="40" max="200" required>
+                        <div class="input-icon"><i class="fas fa-heartbeat"></i></div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="glucose">Glucose (mg/dL)</label>
+                        <input type="number" id="glucose" min="50" max="400" required>
+                        <div class="input-icon"><i class="fas fa-burn"></i></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="predict-btn" id="predictBtn">
+                    <span id="btnText">Calculate My Risk</span>
+                </button>
+            </form>
+
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Particle animation
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    background: rgba(255,255,255,0.5);
+                    border-radius: 50%;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    animation: float ${3 + Math.random() * 2}s infinite linear;
+                    animation-delay: ${Math.random() * 2}s;
+                `;
+                particles.appendChild(particle);
+            }
+        }
+
+        // Form submission
+        document.getElementById("form").onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('predictBtn');
+            const btnText = document.getElementById('btnText');
+            const result = document.getElementById('result');
+
+            btn.classList.add('loading');
+            btnText.textContent = 'Analyzing...';
+
+            try {
+                const data = {
+                    age: +document.getElementById('age').value,
+                    sex: +document.getElementById('sex').value,
+                    is_smoking: +document.getElementById('is_smoking').value,
+                    cigsPerDay: +document.getElementById('cigsPerDay').value || 0,
+                    BPMeds: +document.getElementById('BPMeds').value,
+                    prevalentHyp: +document.getElementById('prevalentHyp').value,
+                    totChol: +document.getElementById('totChol').value,
+                    sysBP: +document.getElementById('sysBP').value,
+                    diaBP: +document.getElementById('diaBP').value,
+                    height: +document.getElementById('height').value,
+                    weight: +document.getElementById('weight').value,
+                    heartRate: +document.getElementById('heartRate').value,
+                    glucose: +document.getElementById('glucose').value
+                };
+
+                const res = await fetch("/predict", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(data)
+                });
+
+                const resultData = await res.json();
+                
+                // Animate result
+                setTimeout(() => {
+                    result.innerHTML = `
+                        <div class="progress-ring">
+                            <svg width="120" height="120">
+                                <defs>
+                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#ff6b6b"></stop>
+                                        <stop offset="100%" stop-color="#feca57"></stop>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="progress-circle" cx="60" cy="60" r="40"></circle>
+                                <circle class="progress progress-circle" cx="60" cy="60" r="40" 
+                                    style="stroke-dashoffset: ${251.2 - (resultData.probability / 100) * 251.2}"></circle>
+                            </svg>
+                            <div class="probability">${resultData.probability}%</div>
+                        </div>
+                        <div>${resultData.risk}</div>
+                    `;
+                    
+                    result.className = `result show ${resultData.risk === 'High Risk' ? 'high' : 'low'}`;
+                }, 1500);
+
+            } catch (error) {
+                result.innerHTML = 'Error calculating risk. Please try again.';
+                result.className = 'result show high';
+            } finally {
+                btn.classList.remove('loading');
+                btnText.textContent = 'Calculate Again';
+            }
+        };
+
+        // Initialize
+        createParticles();
+
+        // Add tooltips
+        document.querySelectorAll('.tooltip-icon').forEach(icon => {
+            icon.addEventListener('mouseenter', function() {
+                // Tooltip functionality can be enhanced here
+            });
+        });
+    </script>
+</body>
+</html>
