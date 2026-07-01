@@ -34,7 +34,6 @@ These Jupyter Notebooks build your foundation in Python programming, data handli
 
 ---
 
-
 ### 🧰 **Tech Stack**
 
 * Python (3.x)
