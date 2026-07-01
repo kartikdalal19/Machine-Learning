@@ -8,7 +8,7 @@
 A complete exploratory data analysis (EDA) of the NYC Airbnb dataset, uncovering pricing patterns,
 listing availability, host behavior, and customer preferences using visualizations and statistics.
 
-#### 🔧 Techniques Used:
+###🔧 Techniques Used:
 
 * Data cleaning and preprocessing
 * Matplotlib & Seaborn visualizations
