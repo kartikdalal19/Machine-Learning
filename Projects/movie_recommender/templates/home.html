@@ -1,0 +1,1475 @@
+<!doctype html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>CineMatch — Movie Recommendation Engine</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    rel="stylesheet"
+  >
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, sans-serif;
+      background: #0b0c10;
+      color: #e2e2ec;
+    }
+
+    .font-outfit {
+      font-family: Outfit, sans-serif;
+    }
+
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .poster {
+      aspect-ratio: 2 / 3;
+    }
+
+    .glass {
+      background: rgba(31, 34, 46, 0.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .movie-card {
+      transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .genre-card {
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .genre-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(239, 68, 68, 0.35);
+      background: rgba(127, 29, 29, 0.18);
+    }
+
+    .info-card {
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    .stat-item {
+      position: relative;
+    }
+
+    @media (min-width: 768px) {
+      .stat-item:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 20%;
+        height: 60%;
+        width: 1px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+    }
+  </style>
+</head>
+
+
+<body class="min-h-screen">
+
+
+<!-- ========================================================= -->
+<!-- HEADER -->
+<!-- ========================================================= -->
+
+<header class="sticky top-0 z-50 glass border-b border-white/5">
+
+  <div class="max-w-7xl mx-auto px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <a
+      href="{{ url_for('home') }}"
+      class="flex items-center gap-2 font-outfit text-xl font-bold"
+    >
+      <span class="material-symbols-outlined text-red-500">
+        movie_filter
+      </span>
+
+      CineMatch
+    </a>
+
+
+    <!-- Navigation -->
+    <nav class="hidden md:flex gap-6 text-sm text-gray-400">
+
+      <a
+        class="text-white hover:text-white transition"
+        href="{{ url_for('home') }}"
+      >
+        Explore
+      </a>
+
+      <a
+        href="#charts"
+        class="hover:text-white transition"
+      >
+        Top Charts
+      </a>
+
+      <a
+        href="#genres"
+        class="hover:text-white transition"
+      >
+        Genres
+      </a>
+
+    </nav>
+
+
+    <!-- Search shortcut -->
+    <button
+      onclick="focusSearch()"
+      class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 text-sm transition"
+    >
+      <span class="material-symbols-outlined text-base">
+        search
+      </span>
+
+      Search movies
+
+      <kbd class="text-xs bg-black/30 px-1.5 rounded">
+        Ctrl K
+      </kbd>
+    </button>
+
+  </div>
+
+</header>
+
+
+
+<main>
+
+
+<!-- ========================================================= -->
+<!-- HERO -->
+<!-- ========================================================= -->
+
+<section class="relative overflow-hidden border-b border-white/5">
+
+  <div
+    class="absolute inset-0 bg-gradient-to-b from-red-950/30 via-[#0b0c10] to-[#0b0c10]"
+  ></div>
+
+  <div
+    class="absolute w-96 h-96 bg-red-600/10 blur-3xl rounded-full -top-40 left-1/2"
+  ></div>
+
+
+  <div class="relative max-w-5xl mx-auto px-4 py-20 lg:py-28 text-center">
+
+
+    <!-- Status -->
+    <div
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 text-red-300 text-xs font-bold uppercase tracking-widest"
+    >
+      <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+
+      Content-Based Recommender Active
+    </div>
+
+
+    <!-- Hero title -->
+    <h1
+      class="font-outfit text-5xl md:text-7xl font-extrabold mt-6 tracking-tight"
+    >
+      Your next favorite movie
+      <br>
+
+      <span
+        class="text-transparent bg-clip-text bg-gradient-to-r from-white via-red-400 to-amber-300"
+      >
+        is one click away.
+      </span>
+    </h1>
+
+
+    <!-- Description -->
+    <p class="max-w-2xl mx-auto mt-6 text-gray-400 text-lg">
+      Find films similar to what you love using TF-IDF feature vectors
+      and cosine similarity across genres, keywords, cast, taglines
+      and directors.
+    </p>
+
+
+    <!-- Search form -->
+    <form
+      id="searchForm"
+      action="{{ url_for('recommend_route') }}"
+      method="post"
+      class="mt-9 max-w-3xl mx-auto"
+    >
+
+      <div
+        class="flex items-center p-1.5 rounded-full bg-[#1f222e] border border-white/10 shadow-2xl focus-within:border-red-500/60"
+      >
+
+        <span class="material-symbols-outlined text-gray-500 ml-4">
+          movie
+        </span>
+
+
+        <input
+          autocomplete="off"
+          id="movieSearchInput"
+          name="movie"
+          required
+          class="flex-1 bg-transparent outline-none px-4 py-3 text-white"
+          placeholder="Search a movie — e.g. Inception, Interstellar..."
+        >
+
+
+        <button
+          type="submit"
+          class="bg-red-600 hover:bg-red-500 rounded-full px-6 py-3 font-bold flex items-center gap-2 transition"
+        >
+          Match Film
+
+          <span class="material-symbols-outlined">
+            arrow_forward
+          </span>
+        </button>
+
+      </div>
+
+
+      <!-- Search suggestions -->
+      <div
+        id="suggestions"
+        class="relative max-w-2xl mx-auto"
+      ></div>
+
+    </form>
+
+
+    <!-- Quick searches -->
+    <div class="flex flex-wrap justify-center gap-2 mt-5">
+
+      <span class="text-gray-600 text-sm">
+        Try:
+      </span>
+
+      {% for seed in [
+        'Inception',
+        'Interstellar',
+        'The Dark Knight',
+        'Pulp Fiction',
+        'The Shawshank Redemption'
+      ] %}
+
+      <button
+        type="button"
+        onclick="searchFor('{{ seed|e }}')"
+        class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 text-sm transition"
+      >
+        {{ seed }}
+      </button>
+
+      {% endfor %}
+
+    </div>
+
+
+    <!-- Surprise me -->
+    <div class="flex justify-center mt-5">
+
+      <button
+        type="button"
+        onclick="surpriseMe()"
+        class="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-amber-300 font-semibold flex gap-2 items-center transition"
+      >
+
+        <span class="material-symbols-outlined">
+          casino
+        </span>
+
+        Surprise Me
+
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- CINE MATCH AT A GLANCE -->
+<!-- ========================================================= -->
+
+<section class="border-b border-white/5 bg-[#11131a]">
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+
+
+    <!-- Section heading -->
+    <div class="text-center mb-7">
+
+      <div
+        class="flex items-center justify-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+      >
+
+        <span class="material-symbols-outlined text-base">
+          insights
+        </span>
+
+        System Overview
+
+      </div>
+
+
+      <h2 class="font-outfit text-2xl md:text-3xl font-bold mt-2">
+        CineMatch at a Glance
+      </h2>
+
+
+      <p class="text-gray-500 text-sm mt-2">
+        A quick look at the recommendation system behind CineMatch.
+      </p>
+
+    </div>
+
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-0">
+
+
+      <!-- Catalog -->
+      <div class="stat-item text-center py-4 px-3">
+
+        <b class="text-2xl">
+          {{ stats.catalog_size }}
+        </b>
+
+        <p class="text-xs uppercase tracking-widest text-gray-500 mt-1">
+          Movies indexed
+        </p>
+
+      </div>
+
+
+      <!-- TF-IDF -->
+      <div class="stat-item text-center py-4 px-3">
+
+        <b class="text-2xl text-red-400">
+          TF-IDF
+        </b>
+
+        <p class="text-xs uppercase tracking-widest text-gray-500 mt-1">
+          Feature vectors
+        </p>
+
+      </div>
+
+
+      <!-- Cosine -->
+      <div class="stat-item text-center py-4 px-3">
+
+        <b class="text-2xl text-amber-300">
+          Cosine
+        </b>
+
+        <p class="text-xs uppercase tracking-widest text-gray-500 mt-1">
+          Similarity metric
+        </p>
+
+      </div>
+
+
+      <!-- Flask -->
+      <div class="stat-item text-center py-4 px-3">
+
+        <b class="text-2xl text-emerald-400">
+          Live
+        </b>
+
+        <p class="text-xs uppercase tracking-widest text-gray-500 mt-1">
+          Flask backend
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- TOP CHARTS -->
+<!-- ========================================================= -->
+
+<section
+  id="charts"
+  class="scroll-mt-24 max-w-7xl mx-auto px-4 lg:px-6 py-14"
+>
+
+
+  <!-- Main heading -->
+  <div class="mb-10">
+
+    <div
+      class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+    >
+
+      <span class="material-symbols-outlined text-base">
+        leaderboard
+      </span>
+
+      CineMatch Rankings
+
+    </div>
+
+
+    <h2 class="font-outfit text-4xl md:text-5xl font-bold mt-2">
+      Top Charts
+    </h2>
+
+
+    <p class="text-gray-400 mt-3 max-w-2xl">
+      Explore the highest-performing and highest-rated movies in your dataset.
+    </p>
+
+  </div>
+
+
+
+  <!-- ======================================================= -->
+  <!-- TOP GROSSING -->
+  <!-- ======================================================= -->
+
+  <div>
+
+    <div class="flex items-end justify-between gap-4 mb-7">
+
+      <div>
+
+        <div
+          class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+        >
+
+          <span class="material-symbols-outlined text-base">
+            payments
+          </span>
+
+          Box Office
+
+        </div>
+
+
+        <h3 class="font-outfit text-2xl md:text-3xl font-bold mt-1">
+          Top Grossing Box Office Hits
+        </h3>
+
+
+        <p class="text-gray-500 text-sm mt-1">
+          Highest revenue movies in your dataset.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="flex gap-5 overflow-x-auto pb-4">
+
+      {% for m in top_grossing %}
+
+        <div class="movie-card min-w-48 sm:min-w-56 w-56">
+          {{ MovieCard(
+            m,
+            m.revenue_display,
+            'text-emerald-400'
+          ) }}
+        </div>
+
+      {% else %}
+
+        {{ Empty("No revenue data found.") }}
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+
+
+  <!-- Divider -->
+  <div class="my-14 border-t border-white/5"></div>
+
+
+
+  <!-- ======================================================= -->
+  <!-- TOP RATED -->
+  <!-- ======================================================= -->
+
+  <div>
+
+    <div class="flex items-end justify-between gap-4 mb-7">
+
+      <div>
+
+        <div
+          class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+        >
+
+          <span class="material-symbols-outlined text-base">
+            star
+          </span>
+
+          Audience & Critics
+
+        </div>
+
+
+        <h3 class="font-outfit text-2xl md:text-3xl font-bold mt-1">
+          Critically Acclaimed & Top Rated
+        </h3>
+
+
+        <p class="text-gray-500 text-sm mt-1">
+          Highest vote averages in your dataset.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="flex gap-5 overflow-x-auto pb-4">
+
+      {% for m in top_rated %}
+
+        <div class="movie-card min-w-48 sm:min-w-56 w-56">
+          {{ MovieCard(
+            m,
+            m.rating,
+            'text-amber-300'
+          ) }}
+        </div>
+
+      {% else %}
+
+        {{ Empty("No rating column found.") }}
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- TOP DIRECTORS -->
+<!-- ========================================================= -->
+
+<section
+  id="directors"
+  class="scroll-mt-24 bg-white/[.025] border-y border-white/5"
+>
+
+  <div class="max-w-7xl mx-auto px-4 lg:px-6 py-14">
+
+
+    <!-- Main heading -->
+    <div class="mb-10">
+
+      <div
+        class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+      >
+
+        <span class="material-symbols-outlined text-base">
+          movie
+        </span>
+
+        Creators
+
+      </div>
+
+
+      <h2 class="font-outfit text-4xl md:text-5xl font-bold mt-2">
+        Top Directors
+      </h2>
+
+
+      <p class="text-gray-400 mt-3 max-w-2xl">
+        Explore the most represented directors in the CineMatch catalog.
+      </p>
+
+    </div>
+
+
+
+    <!-- Subheading -->
+    <div class="flex items-end justify-between gap-4 mb-7">
+
+      <div>
+
+        <div
+          class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+        >
+
+          <span class="material-symbols-outlined text-base">
+            videocam
+          </span>
+
+          Featured Creators
+
+        </div>
+
+
+        <h3 class="font-outfit text-2xl md:text-3xl font-bold mt-1">
+          Legendary Directors
+        </h3>
+
+
+        <p class="text-gray-500 text-sm mt-1">
+          Directors with multiple movies represented in your catalog.
+        </p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Directors -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+
+      {% for d in top_directors %}
+
+      <div
+        class="info-card p-5 rounded-2xl bg-[#14161d] border border-white/5"
+      >
+
+        <span class="material-symbols-outlined text-red-400">
+          videocam
+        </span>
+
+
+        <h3 class="font-outfit text-lg font-bold mt-3 line-clamp-2">
+          {{ d.name }}
+        </h3>
+
+
+        <p class="text-sm text-gray-500 mt-1">
+          {{ d.movie_count }}
+          film{% if d.movie_count != 1 %}s{% endif %}
+        </p>
+
+      </div>
+
+      {% else %}
+
+        {{ Empty("No director data found.") }}
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- TOP ACTORS -->
+<!-- ========================================================= -->
+
+<section
+  id="actors"
+  class="scroll-mt-24"
+>
+
+  <div class="max-w-7xl mx-auto px-4 lg:px-6 py-14">
+
+
+    <!-- Main heading -->
+    <div class="mb-10">
+
+      <div
+        class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+      >
+
+        <span class="material-symbols-outlined text-base">
+          theater_comedy
+        </span>
+
+        Cast
+
+      </div>
+
+
+      <h2 class="font-outfit text-4xl md:text-5xl font-bold mt-2">
+        Top Actors
+      </h2>
+
+
+      <p class="text-gray-400 mt-3 max-w-2xl">
+        Discover the most frequently represented actors in your catalog.
+      </p>
+
+    </div>
+
+
+
+    <!-- Subheading -->
+    <div class="flex items-end justify-between gap-4 mb-7">
+
+      <div>
+
+        <div
+          class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+        >
+
+          <span class="material-symbols-outlined text-base">
+            person
+          </span>
+
+          Featured Cast
+
+        </div>
+
+
+        <h3 class="font-outfit text-2xl md:text-3xl font-bold mt-1">
+          Featured Actors
+        </h3>
+
+
+        <p class="text-gray-500 text-sm mt-1">
+          Actors appearing across multiple titles in the catalog.
+        </p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Actors -->
+    <div class="flex gap-4 overflow-x-auto pb-3">
+
+      {% for a in top_actors %}
+
+      <div
+        class="info-card min-w-48 p-5 rounded-2xl bg-[#14161d] border border-white/5 text-center"
+      >
+
+        <div
+          class="w-16 h-16 rounded-full bg-gradient-to-br from-red-500/30 to-amber-500/20 mx-auto flex items-center justify-center"
+        >
+
+          <span class="material-symbols-outlined text-2xl">
+            person
+          </span>
+
+        </div>
+
+
+        <h3 class="font-bold mt-3 line-clamp-2">
+          {{ a.name }}
+        </h3>
+
+
+        <p class="text-xs text-amber-300 mt-1">
+          {{ a.movie_count }} catalog titles
+        </p>
+
+      </div>
+
+      {% else %}
+
+        {{ Empty("No cast data found.") }}
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- GENRES -->
+<!-- ========================================================= -->
+
+<section
+  id="genres"
+  class="scroll-mt-24 bg-white/[.025] border-y border-white/5"
+>
+
+  <div class="max-w-7xl mx-auto px-4 lg:px-6 py-14">
+
+
+    <!-- Main heading -->
+    <div class="mb-10">
+
+      <div
+        class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+      >
+
+        <span class="material-symbols-outlined text-base">
+          category
+        </span>
+
+        Browse by Category
+
+      </div>
+
+
+      <h2 class="font-outfit text-4xl md:text-5xl font-bold mt-2">
+        Genres
+      </h2>
+
+
+      <p class="text-gray-400 mt-3 max-w-2xl">
+        Explore movies by genre and discover recommendations from your catalog.
+      </p>
+
+    </div>
+
+
+
+    <!-- Subheading -->
+    <div class="flex items-end justify-between gap-4 mb-7">
+
+      <div>
+
+        <div
+          class="flex items-center gap-2 text-red-400 text-xs uppercase tracking-widest font-bold"
+        >
+
+          <span class="material-symbols-outlined text-base">
+            local_movies
+          </span>
+
+          Movie Categories
+
+        </div>
+
+
+        <h3 class="font-outfit text-2xl md:text-3xl font-bold mt-1">
+          Popular Movie Genres
+        </h3>
+
+
+        <p class="text-gray-500 text-sm mt-1">
+          Choose a genre and CineMatch will select a strong seed from your catalog.
+        </p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Genre cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+
+      {% for g in genres %}
+
+      <a
+        href="{{ url_for('genre_route', genre=g.genre) }}"
+        class="genre-card p-5 rounded-2xl bg-[#14161d] border border-white/5"
+      >
+
+        <span class="material-symbols-outlined text-red-400">
+          category
+        </span>
+
+
+        <h3 class="font-bold mt-3">
+          {{ g.genre }}
+        </h3>
+
+
+        <p class="text-sm text-gray-500 mt-1">
+          {{ g.count }} movies
+        </p>
+
+      </a>
+
+      {% else %}
+
+        {{ Empty("No genres found.") }}
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- ========================================================= -->
+<!-- HOW CINEMATCH WORKS -->
+<!-- ========================================================= -->
+
+<section
+  id="how-it-works"
+  class="scroll-mt-24 bg-[#0e1016] border-t border-white/5"
+>
+
+  <div class="max-w-4xl mx-auto px-4 py-16">
+
+
+    <!-- Heading -->
+    <div class="text-center">
+
+      <span
+        class="text-red-400 text-xs font-bold uppercase tracking-widest"
+      >
+        Behind the Algorithm
+      </span>
+
+
+      <h2 class="font-outfit text-3xl md:text-4xl font-bold mt-3">
+        How CineMatch Works
+      </h2>
+
+
+      <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
+        Your recommendation pipeline combines movie metadata,
+        TF-IDF vectorization and cosine similarity to identify
+        movies with similar content.
+      </p>
+
+    </div>
+
+
+
+    <!-- Process -->
+    <div class="grid md:grid-cols-3 gap-4 mt-10">
+
+
+      <!-- Step 1 -->
+      <div class="p-5 bg-[#14161d] rounded-2xl border border-white/5">
+
+        <div
+          class="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center"
+        >
+
+          <span class="material-symbols-outlined text-red-400">
+            database
+          </span>
+
+        </div>
+
+
+        <div class="text-xs text-red-400 font-bold uppercase tracking-widest mt-5">
+          Step 01
+        </div>
+
+
+        <h3 class="font-outfit text-xl font-bold mt-2">
+          Feature Fusion
+        </h3>
+
+
+        <p class="text-sm text-gray-500 mt-2 leading-relaxed">
+          Genres, keywords, tagline, cast and director information
+          are combined into a single content representation.
+        </p>
+
+      </div>
+
+
+
+      <!-- Step 2 -->
+      <div class="p-5 bg-[#14161d] rounded-2xl border border-white/5">
+
+        <div
+          class="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center"
+        >
+
+          <span class="material-symbols-outlined text-red-400">
+            data_object
+          </span>
+
+        </div>
+
+
+        <div class="text-xs text-red-400 font-bold uppercase tracking-widest mt-5">
+          Step 02
+        </div>
+
+
+        <h3 class="font-outfit text-xl font-bold mt-2">
+          TF-IDF Vectorization
+        </h3>
+
+
+        <p class="text-sm text-gray-500 mt-2 leading-relaxed">
+          The combined movie text is transformed into numerical
+          TF-IDF vectors for mathematical comparison.
+        </p>
+
+      </div>
+
+
+
+      <!-- Step 3 -->
+      <div class="p-5 bg-[#14161d] rounded-2xl border border-white/5">
+
+        <div
+          class="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center"
+        >
+
+          <span class="material-symbols-outlined text-red-400">
+            compare_arrows
+          </span>
+
+        </div>
+
+
+        <div class="text-xs text-red-400 font-bold uppercase tracking-widest mt-5">
+          Step 03
+        </div>
+
+
+        <h3 class="font-outfit text-xl font-bold mt-2">
+          Similarity Ranking
+        </h3>
+
+
+        <p class="text-sm text-gray-500 mt-2 leading-relaxed">
+          Cosine similarity compares the selected movie against
+          the catalog and ranks the most similar titles.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- Technologies -->
+    <div class="mt-10 text-center text-xs text-gray-600">
+
+      Python
+      <span class="mx-2">•</span>
+
+      Flask
+      <span class="mx-2">•</span>
+
+      Pandas
+      <span class="mx-2">•</span>
+
+      Scikit-learn
+      <span class="mx-2">•</span>
+
+      TF-IDF
+      <span class="mx-2">•</span>
+
+      Cosine Similarity
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+
+<!-- ========================================================= -->
+<!-- FOOTER -->
+<!-- ========================================================= -->
+
+<footer class="border-t border-white/5 bg-[#090a0e]">
+
+  <div
+    class="max-w-7xl mx-auto px-4 lg:px-6 py-8 flex flex-col md:flex-row gap-4 justify-between text-sm text-gray-500"
+  >
+
+    <span>
+      © 2026 CineMatch
+    </span>
+
+
+    <span>
+      Flask · Python · Pandas · Scikit-learn · OMDb optional
+    </span>
+
+  </div>
+
+</footer>
+
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================================= -->
+
+<script>
+
+const input = document.getElementById("movieSearchInput");
+const suggestions = document.getElementById("suggestions");
+
+let timer;
+
+
+/* ========================================================= */
+/* FOCUS SEARCH */
+/* ========================================================= */
+
+function focusSearch() {
+
+  input.focus();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* ========================================================= */
+/* SUBMIT MOVIE SEARCH */
+/* ========================================================= */
+
+function searchFor(title) {
+
+  input.value = title;
+
+  document.getElementById("searchForm").submit();
+
+}
+
+
+/* ========================================================= */
+/* SURPRISE ME */
+/* ========================================================= */
+
+function surpriseMe() {
+
+  const list = {{ top_rated | map(attribute="title") | list | tojson }};
+
+  if (list.length) {
+
+    const randomMovie =
+      list[Math.floor(Math.random() * list.length)];
+
+    searchFor(randomMovie);
+
+  }
+
+}
+
+
+/* ========================================================= */
+/* LIVE SEARCH SUGGESTIONS */
+/* ========================================================= */
+
+input.addEventListener("input", () => {
+
+  clearTimeout(timer);
+
+  const query = input.value.trim();
+
+
+  if (!query) {
+
+    suggestions.innerHTML = "";
+
+    return;
+
+  }
+
+
+  timer = setTimeout(async () => {
+
+    try {
+
+      const response = await fetch(
+        "/api/search?q=" + encodeURIComponent(query)
+      );
+
+      const data = await response.json();
+
+
+      if (!data.results || !data.results.length) {
+
+        suggestions.innerHTML = "";
+
+        return;
+
+      }
+
+
+      suggestions.innerHTML = `
+        <div
+          class="absolute z-40 left-0 right-0 mt-2 rounded-2xl
+          bg-[#1b1e27] border border-white/10 shadow-2xl
+          overflow-hidden text-left"
+        >
+
+          ${data.results.map(movie => `
+
+            <button
+              type="button"
+              class="block w-full px-5 py-3 hover:bg-white/5
+              text-gray-200 transition"
+              onclick='searchFor(${JSON.stringify(movie)})'
+            >
+              ${escapeHtml(movie)}
+            </button>
+
+          `).join("")}
+
+        </div>
+      `;
+
+    } catch (error) {
+
+      suggestions.innerHTML = "";
+
+    }
+
+  }, 180);
+
+});
+
+
+/* ========================================================= */
+/* FORM VALIDATION */
+/* ========================================================= */
+
+document
+  .getElementById("searchForm")
+  .addEventListener("submit", event => {
+
+    if (!input.value.trim()) {
+
+      event.preventDefault();
+
+      input.focus();
+
+    }
+
+  });
+
+
+/* ========================================================= */
+/* CTRL + K */
+/* ========================================================= */
+
+document.addEventListener("keydown", event => {
+
+  if (
+    (event.ctrlKey || event.metaKey) &&
+    event.key.toLowerCase() === "k"
+  ) {
+
+    event.preventDefault();
+
+    focusSearch();
+
+  }
+
+});
+
+
+/* ========================================================= */
+/* ESCAPE HTML */
+/* ========================================================= */
+
+function escapeHtml(value) {
+
+  return value.replace(
+    /[&<>'"]/g,
+    character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;"
+    }[character])
+  );
+
+}
+
+</script>
+
+
+
+<!-- ========================================================= -->
+<!-- JINJA MACROS -->
+<!-- ========================================================= -->
+
+{% macro SectionHeader(icon, title, sub) %}
+
+<div class="flex items-end justify-between gap-4 mb-7">
+
+  <div>
+
+    <div
+      class="flex items-center gap-2 text-red-400
+      text-xs uppercase tracking-widest font-bold"
+    >
+
+      <span class="material-symbols-outlined text-base">
+        {{ icon }}
+      </span>
+
+      {{ sub }}
+
+    </div>
+
+
+    <h2 class="font-outfit text-3xl font-bold mt-1">
+      {{ title }}
+    </h2>
+
+  </div>
+
+</div>
+
+{% endmacro %}
+
+
+
+{% macro MovieCard(m, badge, badgeclass='') %}
+
+<button
+  type="button"
+  onclick="searchFor('{{ m.title|e }}')"
+  class="group w-full rounded-2xl overflow-hidden
+  bg-[#14161d] border border-white/5 text-left
+  hover:-translate-y-1 transition shadow-lg"
+>
+
+  <div class="poster relative bg-[#1f222e]">
+
+    <img
+      src="{{ m.poster }}"
+      onerror="this.src='{{ url_for('static', filename='movie_placeholder.jpg') }}'"
+      class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+      alt="{{ m.title|e }}"
+      loading="lazy"
+    >
+
+
+    <div
+      class="absolute inset-0 bg-gradient-to-t
+      from-black/80 via-transparent to-transparent"
+    ></div>
+
+
+    <span
+      class="absolute top-3 left-3 px-2 py-1 rounded-full
+      bg-black/70 {{ badgeclass }} text-xs font-bold"
+    >
+      {{ badge }}
+    </span>
+
+
+    <span
+      class="absolute bottom-3 left-3 text-xs text-gray-300"
+    >
+      {{ m.year }} · {{ m.director }}
+    </span>
+
+  </div>
+
+
+  <div class="p-4">
+
+    <h3
+      class="font-bold line-clamp-2 group-hover:text-red-400 transition"
+    >
+      {{ m.title }}
+    </h3>
+
+
+    <p class="text-xs text-gray-500 mt-2">
+      {{ m.genres[:2] | join(' · ') }}
+    </p>
+
+  </div>
+
+</button>
+
+{% endmacro %}
+
+
+
+{% macro Empty(text) %}
+
+<div
+  class="p-6 rounded-xl bg-white/5 text-gray-500
+  border border-white/5"
+>
+  {{ text }}
+</div>
+
+{% endmacro %}
+
+
+</body>
+</html>
